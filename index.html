@@ -314,17 +314,39 @@
   .modal-close { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 24px; color: var(--steel); }
 
   /* Details Car Modal */
+  .car-detail-layout { display: flex; gap: 40px; align-items: flex-start; }
+  .car-detail-gallery-col { flex: 1 1 52%; min-width: 0; }
+  .car-detail-info-col { flex: 1 1 48%; min-width: 0; }
+  @media (max-width: 860px) {
+    .car-detail-layout { flex-direction: column; }
+  }
   .car-detail-gallery { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .main-img-wrap { aspect-ratio: 16/9; background: #eee; border-radius: var(--radius); overflow: hidden; position: relative; cursor: zoom-in; touch-action: pan-y; }
-  .main-img-wrap img { width: 100%; height: 100%; object-fit: cover; user-select: none; }
+  .main-img-wrap { aspect-ratio: 4/3; background: var(--navy-deep); border-radius: var(--radius); overflow: hidden; position: relative; cursor: zoom-in; touch-action: pan-y; }
+  .main-img-wrap img { width: 100%; height: 100%; object-fit: contain; user-select: none; background: var(--navy-deep); }
   .main-img-wrap .zoom-hint {
     position: absolute; bottom: 10px; right: 10px; background: rgba(11,19,27,0.65); color: #fff;
     font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 20px; pointer-events: none;
   }
+  .detail-nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+    background: rgba(11,19,27,0.55); border: 1px solid rgba(255,255,255,0.3); color: #fff;
+    width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all .2s;
+  }
+  .detail-nav-btn:hover { background: rgba(194, 155, 99, 0.75); border-color: var(--gold); }
+  .detail-nav-prev { left: 10px; }
+  .detail-nav-next { right: 10px; }
   .thumb-gallery { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
   .thumb-gallery img { width: 70px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; opacity: 0.6; transition: opacity .2s; flex-shrink: 0; }
   .thumb-gallery img.active { opacity: 1; border: 2px solid var(--gold); }
   .detail-specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; background: var(--gray-alt); padding: 16px; border-radius: var(--radius); margin: 20px 0; font-size: 13.5px; }
+  .carte-grise-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; text-align: center; text-decoration: none; padding: 13px 20px;
+    border: 1.5px solid var(--yacht); color: var(--yacht); border-radius: var(--radius);
+    font-weight: 700; font-size: 13.5px; margin-top: 10px; transition: all .2s;
+  }
+  .carte-grise-btn:hover { background: var(--yacht); color: #fff; }
 
   /* Lightbox */
   .lightbox { display: none; position: fixed; inset: 0; background: rgba(5,9,13,0.97); z-index: 400; align-items: center; justify-content: center; touch-action: pan-y; }
@@ -592,7 +614,7 @@
   </header>
 
   <section style="padding: 56px 32px 96px;">
-    <div class="section-inner" style="max-width: 860px;">
+    <div class="section-inner" style="max-width: 1180px;">
       <div id="carPageNotFound" style="display:none; text-align:center; padding: 60px 0;">
         <h2>Annonce introuvable</h2>
         <p style="color:var(--steel);">Ce véhicule n'est plus disponible ou le lien n'est plus valide.</p>
@@ -600,25 +622,37 @@
       </div>
 
       <div id="carPageContent">
-        <div class="car-detail-gallery">
-          <div class="main-img-wrap" id="mainImgWrap">
-            <img id="detailMainImg" src="" alt="Véhicule">
-            <span class="zoom-hint">Cliquer pour agrandir</span>
+        <div class="car-detail-layout">
+          <div class="car-detail-gallery-col">
+            <div class="car-detail-gallery">
+              <div class="main-img-wrap" id="mainImgWrap">
+                <img id="detailMainImg" src="" alt="Véhicule">
+                <span class="zoom-hint">Cliquer pour agrandir</span>
+                <button type="button" class="detail-nav-btn detail-nav-prev" id="detailNavPrev" onclick="detailNav(-1)" title="Photo précédente">‹</button>
+                <button type="button" class="detail-nav-btn detail-nav-next" id="detailNavNext" onclick="detailNav(1)" title="Photo suivante">›</button>
+              </div>
+              <div class="thumb-gallery" id="detailThumbs"></div>
+            </div>
           </div>
-          <div class="thumb-gallery" id="detailThumbs"></div>
-        </div>
-        <h1 id="detailTitle" style="font-size:30px;"></h1>
-        <div id="detailPrice" style="font-size:24px; font-weight:700; color:var(--gold); margin: 8px 0;"></div>
-        <p id="detailDesc" style="color:var(--steel); font-size:14.5px; line-height:1.7;"></p>
 
-        <div class="detail-specs-grid">
-          <div><strong>Année :</strong> <span id="specYear"></span></div>
-          <div><strong>Kilométrage :</strong> <span id="specMileage"></span></div>
-          <div><strong>Boîte :</strong> <span id="specGearbox"></span></div>
-          <div><strong>Carburant :</strong> <span id="specFuel"></span></div>
-        </div>
+          <div class="car-detail-info-col">
+            <h1 id="detailTitle" style="font-size:30px;"></h1>
+            <div id="detailPrice" style="font-size:24px; font-weight:700; color:var(--gold); margin: 8px 0;"></div>
+            <p id="detailDesc" style="color:var(--steel); font-size:14.5px; line-height:1.7;"></p>
 
-        <a href="index.html#contact" class="submit-btn" style="display:block; text-align:center; text-decoration:none;">Réserver / Demander des informations</a>
+            <div class="detail-specs-grid">
+              <div><strong>Année :</strong> <span id="specYear"></span></div>
+              <div><strong>Kilométrage :</strong> <span id="specMileage"></span></div>
+              <div><strong>Boîte :</strong> <span id="specGearbox"></span></div>
+              <div><strong>Carburant :</strong> <span id="specFuel"></span></div>
+              <div><strong>Puissance fiscale :</strong> <span id="specPower"></span></div>
+              <div><strong>CO2 :</strong> <span id="specCo2"></span></div>
+            </div>
+
+            <a href="index.html#contact" class="submit-btn" style="display:block; text-align:center; text-decoration:none;">Réserver / Demander des informations</a>
+            <a href="https://www.service-public.gouv.fr/simulateur/calcul/cout-certificat-immatriculation#main" target="_blank" rel="noopener" class="carte-grise-btn">Simuler le prix de la carte grise ↗</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -724,6 +758,10 @@
       <div><label>Statut</label>
         <select id="fStatus"><option>Disponible</option><option>Réservé</option><option>Vendu</option></select>
       </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;" class="f-row">
+      <div><label>Puissance fiscale (CV)</label><input id="fPower" type="number" placeholder="8"></div>
+      <div><label>CO2 (g/km)</label><input id="fCo2" type="number" placeholder="145"></div>
     </div>
 
     <div class="f-row">
@@ -1066,6 +1104,12 @@ function renderCarPage(id) {
   document.getElementById('specMileage').textContent = car.mileage;
   document.getElementById('specGearbox').textContent = car.gearbox;
   document.getElementById('specFuel').textContent = car.fuel;
+  document.getElementById('specPower').textContent = car.power ? `${car.power} CV` : '—';
+  document.getElementById('specCo2').textContent = car.co2 ? `${car.co2} g/km` : '—';
+
+  const hasMultiplePhotos = car.photos && car.photos.length > 1;
+  document.getElementById('detailNavPrev').style.display = hasMultiplePhotos ? 'flex' : 'none';
+  document.getElementById('detailNavNext').style.display = hasMultiplePhotos ? 'flex' : 'none';
 
   const thumbsContainer = document.getElementById('detailThumbs');
   thumbsContainer.innerHTML = '';
@@ -1388,6 +1432,8 @@ function openForm() {
   document.getElementById('fYear').value = '';
   document.getElementById('fPrice').value = '';
   document.getElementById('fMileage').value = '';
+  document.getElementById('fPower').value = '';
+  document.getElementById('fCo2').value = '';
   document.getElementById('fDesc').value = '';
   document.getElementById('modalTitle').textContent = 'Ajouter une annonce';
   tempPhotos = [];
@@ -1408,6 +1454,8 @@ function editListing(id) {
   document.getElementById('fGearbox').value = c.gearbox;
   document.getElementById('fFuel').value = c.fuel;
   document.getElementById('fStatus').value = c.status;
+  document.getElementById('fPower').value = c.power || '';
+  document.getElementById('fCo2').value = c.co2 || '';
   document.getElementById('fDesc').value = c.desc;
 
   tempPhotos = [...c.photos];
@@ -1431,6 +1479,8 @@ async function saveListing() {
   const gearbox = document.getElementById('fGearbox').value;
   const fuel = document.getElementById('fFuel').value;
   const status = document.getElementById('fStatus').value;
+  const power = document.getElementById('fPower').value;
+  const co2 = document.getElementById('fCo2').value;
   const desc = document.getElementById('fDesc').value;
 
   if (!brand || !model || !price) {
@@ -1440,7 +1490,7 @@ async function saveListing() {
 
   const carData = {
     id: id ? Number(id) : Date.now(),
-    brand, model, year, price, mileage, gearbox, fuel, status, desc,
+    brand, model, year, price, mileage, gearbox, fuel, status, power, co2, desc,
     photos: tempPhotos.length > 0 ? tempPhotos : ["https://via.placeholder.com/600x400"]
   };
 
